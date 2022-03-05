@@ -4,12 +4,16 @@
 //
 //  Created by Michael M. Mayer on 3/1/22.
 //
+// Inspired by Paul Hudson at [HackingWithSwift.com](https://www.hackingwithswift.com), this started as an exercise that was part of his [100 Days of SwiftUI](https://www.hackingwithswift.com/100/swiftui).
 
 import SwiftUI
+
 // The number of images of rock, paper, scissors
 let numImages = 10
 
-// The three possible answers of rock, paper, scissors are presented in a different order for each question.
+// The three possible answers of rock, paper, scissors are presented
+// in a different order for each round.  This requires an extra level
+// of indirection to figure out which type of item was tapped.
 var answers = [0, 1, 2].shuffled()
 
 struct ContentView: View {
@@ -99,6 +103,9 @@ struct ContentView: View {
                         .padding(30)
                     Text("Timer: \(timeRemaining)").bold()
                         .onReceive(timer) { _ in
+                            // Whenever the timer fires, we update the time remaining
+                            // and check to see if the time for the current turn has
+                            // expired.  If so, we update the score and start a new turn.
                             if hasStarted {
                                 timeRemaining -= 1
                                 if timeRemaining <= 0 {
@@ -114,6 +121,8 @@ struct ContentView: View {
         }
     }
     
+    // Provides a string for that item
+    // Could have used a dictioany or an array
     func randItem(_ choice: Int) -> String {
         switch choice {
             case 0:
@@ -127,26 +136,37 @@ struct ContentView: View {
         }
     }
     
+    // Provides a string for objective of winning or losing against an item
     func randOutcome() -> String {
         return outcome ? "wins" : "loses"
     }
     
+    // Determines whether we answered correctly
+    // Sometimes we are trying to beat the game's choice, sometimes we are
+    // trying to lose against the game's choice.
     func answer(_ answer: Int) -> Void {
+        // we only do anything when a button is tapped, if the game has started
         if hasStarted {
             let remainingTime = timeRemaining
+            
+            // the winning option to answer correctly
             if outcome && answer == (gameChoice + 1) % 3 {
                 score += remainingTime
             }
+            // the losing option to answer correctly
             else if !outcome && answer == (gameChoice - 1 + 3) % 3 {
                 score += remainingTime
             }
+            // else we didn't answer correctly
             else {
                 score -= 1
             }
+            // Start a new turn
             newTurn()
         }
     }
     
+    // Updates all the necessary values for the new turn
     func newTurn() {
         answers.shuffle()
         gameChoice = Int.random(in: 0..<3)
